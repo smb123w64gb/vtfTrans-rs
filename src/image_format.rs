@@ -47,3 +47,4 @@ pub enum ImageFormat
 	IMAGE_FORMAT_LINEAR_I8,
 	NUM_IMAGE_FORMATS
 }
+static ImageFormatBlock: &'static [i32] = &[4,4,3,3,2,1,2,1,1,3,3,4,4,8,16,16,4,2,2,2,8,2,2,4,8,8,4,4,12,16,4,4,4,4,4,3,3,2,1];

@@ -22,6 +22,7 @@ struct Args {
 }
 
 mod vtf;
+mod xtf;
 mod image_format;
 
 fn main() {
