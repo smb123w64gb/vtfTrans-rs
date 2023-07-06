@@ -21,6 +21,9 @@ struct Args {
 
 }
 
+mod vtf;
+mod image_format;
+
 fn main() {
     let args = Args::parse();
     if args.vtf {

@@ -1,24 +1,24 @@
-use binrw::{BinReaderExt, BinRead, BinResult};
+use binrw::{BinRead, BinWrite,BinReaderExt,BinResult};
 use std::io::BufReader;
 use std::path::Path;
-use modular_bitfield::prelude::*;
 
-mod image_format;
+use crate::image_format::ImageFormat;
 
-#[binrw]
-#[br(align_before = 0x10)]
+#[derive(BinRead, BinWrite)]
+
 pub struct VectorAligned{
+    #[br(align_before = 0x10)]
     pub x : f32,
     pub y : f32,
+    #[br(align_after=0x10)]
     pub z : f32,
 }
 
 
-#[binrw]
+#[derive(BinRead, BinWrite)]
 #[brw(little, magic = b"VTF\x00")]
 pub struct VTFFile {
-    #[brw(count = 2)]
-    pub version: Vec<u32>,
+    pub version:(u32,u32),
     pub header_size: u32,
     pub width:u16,
     pub height:u16,
@@ -32,8 +32,6 @@ pub struct VTFFile {
     pub low_res_image_format:ImageFormat,
     pub low_res_image_width:u8,
     pub low_res_image_height:u8,
-    
-   
 }
 
 

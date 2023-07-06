@@ -1,8 +1,8 @@
-use binrw::{BinReaderExt, BinRead, BinResult};
+use binrw::{BinReaderExt, BinRead,BinWrite, BinResult};
 
 #[derive(BinRead, BinWrite)]
 #[brw(repr(u32))]
-enum ImageFormat
+pub enum ImageFormat
 {
 	IMAGE_FORMAT_UNKNOWN = -1,
 	IMAGE_FORMAT_RGBA8888 = 0,
@@ -46,4 +46,4 @@ enum ImageFormat
 	IMAGE_FORMAT_LINEAR_BGRX5551,
 	IMAGE_FORMAT_LINEAR_I8,
 	NUM_IMAGE_FORMATS
-};
+}
