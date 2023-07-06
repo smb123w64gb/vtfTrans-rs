@@ -1,4 +1,4 @@
-use binrw::{BinReaderExt, BinRead,BinWrite, BinResult};
+use binrw::{BinRead,BinWrite};
 
 #[derive(BinRead, BinWrite)]
 #[brw(repr(u32))]
