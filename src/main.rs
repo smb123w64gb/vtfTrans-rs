@@ -1,7 +1,7 @@
 
 use clap::Parser;
+use mip_helper::Mips;
 use std::path::PathBuf;
-
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
@@ -24,9 +24,17 @@ struct Args {
 mod vtf;
 mod xtf;
 mod image_format;
+mod mip_helper;
 
 fn main() {
     let args = Args::parse();
+
+    let mut demo = Mips::generate_levels(512, 512, mip_helper::Order::big);
+    for x in &demo.level{
+        println!("{},{}",x.resolution.0,x.resolution.1);
+    }
+    println!("{}",demo.level.len());
+
     if args.vtf {
         match args.input_file {
             Some( input) => {
@@ -41,8 +49,22 @@ fn main() {
             println!("Output file is {}",output.display())
         },
             None => println!("Can not progress\n No file found for input"),
-            
         }
-    } 
+    } else if args.xtf {
+        match args.input_file {
+            Some( input) => {
+            println!("File {} inputed",input.display());
+            let mut output:PathBuf;
+            match args.output_file {
+                Some(out) => output = out,
+                None => {output = input.clone();
+                    output.set_extension("xtf");
+                },
+            }
+            println!("Output file is {}",output.display())
+        },
+            None => println!("Can not progress\n No file found for input"),
+        }
+    }
 
 }

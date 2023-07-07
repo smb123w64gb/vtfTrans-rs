@@ -1,5 +1,5 @@
 use binrw::{BinRead, BinWrite,BinReaderExt,BinResult};
-use std::io::BufReader;
+use std::io::{BufReader,BufWriter};
 use std::path::Path;
 
 use crate::image_format::ImageFormat;
@@ -51,6 +51,9 @@ pub struct XTFFile {
 
 impl XTFFile{
     pub fn open<P: AsRef<Path>>(path: P) -> BinResult<Self> {
+        BufReader::new(std::fs::File::open(path)?).read_le()
+    }
+    pub fn write<P: AsRef<Path>>(path: P) -> BinResult<Self> {
         BufReader::new(std::fs::File::open(path)?).read_le()
     }
     pub fn new() -> Self{
