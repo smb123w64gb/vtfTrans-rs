@@ -53,8 +53,8 @@ impl XTFFile{
     pub fn open<P: AsRef<Path>>(path: P) -> BinResult<Self> {
         BufReader::new(std::fs::File::open(path)?).read_le()
     }
-    pub fn write<P: AsRef<Path>>(path: P) -> BufWriter<Self> {
-        BufWriter::new(std::fs::File::open(path)?).read_le()
+    pub fn write<P: AsRef<Path>>(path: P) -> BinResult<Self> {
+        BufReader::new(std::fs::File::open(path)?).read_le()
     }
     pub fn new() -> Self{
         Self { version: (XTF_MAJOR_VERSION,XTF_MINOR_VERSION), header_size: (58), flags: (0), width: (0), height: (0), depth: (1), num_frames: (1), image_data_offset: (0x200), reflectivity: (Vector{ x: (1.0), y: (1.0), z: (1.0) }), bump_scale: (1.0), image_format: (ImageFormat::IMAGE_FORMAT_UNKNOWN), low_res_image_width: (1), low_res_image_height: (1), fallback_res_image_width: (8), fallback_res_image_height: (8), mip_skip_count: (0), pad: (0) }
