@@ -33,6 +33,11 @@ fn main() {
     for x in &demo.level{
         println!("{},{}",x.resolution.0,x.resolution.1);
     }
+    println!("REVERSED");
+    demo.reverse();
+    for x in &demo.level{
+        println!("{},{}",x.resolution.0,x.resolution.1);
+    }
     println!("{}",demo.level.len());
 
     if args.vtf {
