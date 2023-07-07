@@ -1,4 +1,4 @@
-use binrw::{BinRead, BinWrite,BinReaderExt,BinResult};
+use binrw::{BinRead, BinWrite,BinReaderExt,BinResult,io::{Read,Cursor, Seek,SeekFrom}};
 use std::io::{BufReader,BufWriter};
 use std::path::Path;
 
@@ -52,6 +52,9 @@ pub struct XTFFile {
 impl XTFFile{
     pub fn open<P: AsRef<Path>>(path: P) -> BinResult<Self> {
         BufReader::new(std::fs::File::open(path)?).read_le()
+    }
+    pub fn read<R: Read + Seek>(reader: &mut R) -> BinResult<Self> {
+        reader.read_le()
     }
     pub fn write<P: AsRef<Path>>(path: P) -> BinResult<Self> {
         BufReader::new(std::fs::File::open(path)?).read_le()
