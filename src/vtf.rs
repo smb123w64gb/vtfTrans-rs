@@ -1,4 +1,4 @@
-use binrw::{BinRead, BinWrite,BinReaderExt,BinResult, io::{Read,Cursor, Seek,SeekFrom}};
+use binrw::{BinRead, BinWrite,BinReaderExt,BinWriterExt,BinResult, io::{Read,Write,Cursor, Seek,SeekFrom}};
 use std::io::BufReader;
 use std::path::Path;
 
@@ -48,7 +48,10 @@ impl VTFFile{
     pub fn read<R: Read + Seek>(reader: &mut R) -> BinResult<Self> {
         reader.read_le()
     }
-
+    pub fn write<W: Write + Seek>(&self, f: &mut W) -> std::io::Result<()> {
+        self.write_le(f);
+        f.flush()
+    }
     pub fn new() -> Self{
         Self { version: (VTF_MAJOR_VERSION,VTF_MINOR_VERSION), header_size: (0x50), width: (0), height: (0), flags: (0), num_frames: (1), start_frame: (0), reflectivity: (VectorAligned { x: (1.0), y: (1.0), z: (1.0) }), bump_scale: (1.0), image_format: (ImageFormat::IMAGE_FORMAT_UNKNOWN), num_mip_levels: (1), low_res_image_format: (ImageFormat::IMAGE_FORMAT_UNKNOWN), low_res_image_width: (0), low_res_image_height: (0),depth: (1) }
     }

@@ -1,4 +1,4 @@
-use binrw::{BinRead, BinWrite,BinReaderExt,BinResult,io::{Read,Cursor, Seek,SeekFrom}};
+use binrw::{BinRead, BinWrite,BinReaderExt,BinWriterExt,BinResult,io::{Read,Cursor,Write, Seek,SeekFrom}};
 use std::io::{BufReader,BufWriter};
 use std::path::Path;
 
@@ -56,8 +56,12 @@ impl XTFFile{
     pub fn read<R: Read + Seek>(reader: &mut R) -> BinResult<Self> {
         reader.read_le()
     }
-    pub fn write<P: AsRef<Path>>(path: P) -> BinResult<Self> {
-        BufReader::new(std::fs::File::open(path)?).read_le()
+    pub fn write<W: Write + Seek>(&self, f: &mut W) -> std::io::Result<()> {
+        self.write_le(f);
+        f.flush()?;
+        f.seek(SeekFrom::Start(self.image_data_offset as u64));
+        f.flush()
+
     }
     pub fn new() -> Self{
         Self { version: (XTF_MAJOR_VERSION,XTF_MINOR_VERSION), header_size: (58), flags: (0), width: (0), height: (0), depth: (1), num_frames: (1), image_data_offset: (0x200), reflectivity: (Vector{ x: (1.0), y: (1.0), z: (1.0) }), bump_scale: (1.0), image_format: (ImageFormat::IMAGE_FORMAT_UNKNOWN), low_res_image_width: (1), low_res_image_height: (1), fallback_res_image_width: (8), fallback_res_image_height: (8), mip_skip_count: (0), pad: (0) }
