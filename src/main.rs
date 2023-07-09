@@ -29,16 +29,6 @@ mod mip_helper;
 fn main() {
     let args = Args::parse();
 
-    let mut demo = Mips::generate_levels(512, 512, mip_helper::Order::big);
-    for x in &demo.level{
-        println!("{},{}",x.resolution.0,x.resolution.1);
-    }
-    println!("REVERSED");
-    demo.reverse();
-    for x in &demo.level{
-        println!("{},{}",x.resolution.0,x.resolution.1);
-    }
-    println!("{}",demo.level.len());
 
     if args.vtf {
         match args.input_file {
@@ -51,7 +41,8 @@ fn main() {
                     output.set_extension("vtf");
                 },
             }
-            println!("Output file is {}",output.display())
+            println!("Output file is {}",output.display());
+            
         },
             None => println!("Can not progress\n No file found for input"),
         }
@@ -66,7 +57,7 @@ fn main() {
                     output.set_extension("xtf");
                 },
             }
-            println!("Output file is {}",output.display())
+            println!("Output file is {}",output.display());
         },
             None => println!("Can not progress\n No file found for input"),
         }

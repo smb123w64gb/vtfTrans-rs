@@ -1,6 +1,6 @@
 use binrw::{BinRead,BinWrite};
 
-#[derive(BinRead, BinWrite)]
+#[derive(BinRead, BinWrite,Debug)]
 #[brw(repr(u32))]
 pub enum ImageFormat
 {

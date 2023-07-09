@@ -2,7 +2,7 @@ use binrw::{BinRead, BinWrite,BinReaderExt,BinWriterExt,BinResult,io::{Read,Curs
 use std::io::{BufReader,BufWriter};
 use std::path::Path;
 
-use crate::image_format::ImageFormat;
+use crate::{image_format::ImageFormat, mip_helper};
 
 
 
@@ -19,7 +19,7 @@ pub struct Vector{
 
 #[derive(BinRead, BinWrite)]
 #[brw(little, magic = b"XTF\x00")]
-pub struct XTFFile {
+pub struct XTFHdr {
     pub version:(u32,u32),
     pub header_size: u32,
 
@@ -48,8 +48,21 @@ pub struct XTFFile {
 }
 
 
+pub struct XTFFile {
+    pub hdr:XTFHdr,
+    pub mips:mip_helper::Mips,
+    pub low_res:mip_helper::Mip,
+}
 
-impl XTFFile{
+impl XTFFile {
+    pub fn read<R: Read + Seek>(reader: &mut R) -> Self {
+        let hdr = XTFHdr.read(reader);
+        let mut mips = mip_helper::Mips::generate_levels(hdr.width, hdr.height, mip_helper::Order::little);
+        mips
+    }
+}
+
+impl XTFHdr{
     pub fn open<P: AsRef<Path>>(path: P) -> BinResult<Self> {
         BufReader::new(std::fs::File::open(path)?).read_le()
     }
@@ -58,10 +71,7 @@ impl XTFFile{
     }
     pub fn write<W: Write + Seek>(&self, f: &mut W) -> std::io::Result<()> {
         self.write_le(f);
-        f.flush()?;
-        f.seek(SeekFrom::Start(self.image_data_offset as u64));
         f.flush()
-
     }
     pub fn new() -> Self{
         Self { version: (XTF_MAJOR_VERSION,XTF_MINOR_VERSION), header_size: (58), flags: (0), width: (0), height: (0), depth: (1), num_frames: (1), image_data_offset: (0x200), reflectivity: (Vector{ x: (1.0), y: (1.0), z: (1.0) }), bump_scale: (1.0), image_format: (ImageFormat::IMAGE_FORMAT_UNKNOWN), low_res_image_width: (1), low_res_image_height: (1), fallback_res_image_width: (8), fallback_res_image_height: (8), mip_skip_count: (0), pad: (0) }

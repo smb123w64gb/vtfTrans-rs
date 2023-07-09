@@ -2,7 +2,7 @@ use binrw::{BinRead, BinWrite,BinReaderExt,BinWriterExt,BinResult, io::{Read,Wri
 use std::io::BufReader;
 use std::path::Path;
 
-use crate::image_format::ImageFormat;
+use crate::{image_format::ImageFormat, mip_helper};
 
 
 
@@ -21,7 +21,7 @@ pub struct VectorAligned{
 
 #[derive(BinRead, BinWrite)]
 #[brw(little, magic = b"VTF\x00")]
-pub struct VTFFile {
+pub struct VTFHdr {
     pub version:(u32,u32),
     pub header_size: u32,
     pub width:u16,
@@ -39,9 +39,14 @@ pub struct VTFFile {
     pub depth:u16,
 }
 
+pub struct VTFFile{
+    pub hdr:VTFHdr,
+    pub low_res:mip_helper::Mip,
+    pub mips:mip_helper::Mips,
+}
 
 
-impl VTFFile{
+impl VTFHdr{
     pub fn open<P: AsRef<Path>>(path: P) -> BinResult<Self> {
         BufReader::new(std::fs::File::open(path)?).read_le()
     }

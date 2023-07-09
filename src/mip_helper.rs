@@ -1,5 +1,5 @@
 use core::matches;
-use std::io::{BufReader,BufWriter};
+use std::io::{BufReader,BufWriter,Write,Read};
 use std::path::Path;
 pub struct Mip{
     pub resolution : (u16,u16),
@@ -13,6 +13,16 @@ pub enum Order{
 pub struct Mips{
     pub direction : Order,
     pub level : Vec<Mip>,
+}
+
+
+impl Mip {
+    pub fn read_mip<R: Read>(&mut self,mut reader: R,bpp:i32){
+        let mut data = vec![0u8;((self.resolution.0 * self.resolution.1) as i32 *bpp) as usize];
+        reader.read_exact(&mut data);
+        self.img_data = Some(data)
+    }
+    
 }
 
 impl Mips{
@@ -37,8 +47,10 @@ impl Mips{
         self.level.reverse();
 
     }
-    pub fn read_mips<P: AsRef<Path>>(&mut self,path: P,bpp:i32){
-        
+    pub fn read_mips<R: Read>(&mut self,mut reader: R,bpp:i32){
+        for mut a in &mut self.level{
+            a.read_mip(&mut reader, bpp);
+        }
     }
 
 }
