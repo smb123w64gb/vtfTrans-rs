@@ -1,3 +1,6 @@
+
+use std::collections::btree_map::Range;
+
 fn generate_swizzle_masks(width:u32 ,height:u32 ,depth:u32 ,
                         mut mask_x:u32 ,mut mask_y:u32 ,mut mask_z:u32){
     let mut x:u32 = 0;
@@ -44,4 +47,27 @@ fn get_swizzled_offset(x:u32,y:u32,z:u32,
                            | fill_pattern(mask_y, y)
                            | fill_pattern(mask_z, z))
 }
-
+fn unswizzle_box(src_buf:Vec<u8>,width:u32,height:u32,depth:u32,row_pitch:u32,slice_pitch:u32,bytes_per_pixel:u32) -> Vec<u8>{
+    let mut mask_x;
+    let mut mask_y;
+    let mut mask_z;
+    generate_swizzle_masks(width, height, depth, mask_x, mask_y, mask_z);
+    
+    let mut x:u32;
+    let mut y:u32;
+    let mut z:u32;
+    let mut dst_buf:Vec<u8> = src_buf.clone();
+    let mut dst_off = 0;
+    for z in 0..depth {
+        for y in 0..height{
+            for x in 0..width{
+                let src = get_swizzled_offset(x, y, z, mask_x, mask_y, mask_z,
+                                          bytes_per_pixel);
+                let dst = dst_off + y*row_pitch+x*bytes_per_pixel;
+                dst_buf.copy_from_slice(src)
+            }
+        }
+        dst_off+=slice_pitch
+    }
+    dst_buf
+}
