@@ -1,5 +1,5 @@
 
-use clap::Parser;
+use clap::{Parser, Arg,CommandFactory};
 use mip_helper::Mips;
 use std::path::PathBuf;
 use std::io::BufReader;
@@ -14,10 +14,10 @@ struct Args {
     xtf: bool,
 
     /// Takes in .vtf or .xtf to convert from
-    #[arg(value_name = "FILE")]
+    #[arg(value_name = "IN_FILE")]
     input_file: Option<PathBuf>,
     /// Takes in .vtf or .xtf to convert to
-    #[arg(value_name = "FILE")]
+    #[arg(value_name = "OUT_FILE")]
     output_file: Option<PathBuf>,
 
 }
@@ -30,6 +30,7 @@ mod transition;
 
 fn main() {
     let args = Args::parse();
+    let mut cmd = Args::command();
 
 
     if args.vtf {
@@ -64,6 +65,6 @@ fn main() {
         },
             None => println!("Can not progress\n No file found for input"),
         }
-    }
+    }else {cmd.print_help();}
 
 }
