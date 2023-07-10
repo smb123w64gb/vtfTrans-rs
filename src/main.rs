@@ -2,6 +2,7 @@
 use clap::Parser;
 use mip_helper::Mips;
 use std::path::PathBuf;
+use std::io::BufReader;
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
@@ -25,6 +26,7 @@ mod vtf;
 mod xtf;
 mod image_format;
 mod mip_helper;
+mod transition;
 
 fn main() {
     let args = Args::parse();
@@ -42,6 +44,7 @@ fn main() {
                 },
             }
             println!("Output file is {}",output.display());
+            transition::xtf2vtf(input,output);
             
         },
             None => println!("Can not progress\n No file found for input"),
