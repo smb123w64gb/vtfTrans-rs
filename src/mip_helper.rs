@@ -20,7 +20,6 @@ pub struct Mips{
 
 impl Mip {
     pub fn read_mip<R: Read>(&mut self,mut reader:  &mut R,format : &image_format::ImageFormat){
-        println!("W:{}\tH:{}",self.resolution.0,self.resolution.1);
         let w = if self.resolution.0%4 == 0{self.resolution.0}  else {(self.resolution.0+(4-(self.resolution.0 % 4)))};
         let h = if self.resolution.1%4 == 0{self.resolution.1}  else {(self.resolution.1+(4-(self.resolution.1 % 4)))};
         let size = match format {
@@ -31,7 +30,6 @@ impl Mip {
             _ => (((self.resolution.0 * self.resolution.1) as usize)* image_format::ImageFormatBlock[*format as usize]),
             
         };
-        println!("{}",size);
         let mut data = vec![0u8;size];
         reader.read_exact(&mut data);
         self.img_data = Some(data)

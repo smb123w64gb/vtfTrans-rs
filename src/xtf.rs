@@ -80,6 +80,7 @@ impl XTFFile {
     pub fn read<R: Read + Seek>(reader: &mut R) -> Self {
         let hdr:XTFHdr = XTFHdr::read(reader).unwrap();
         reader.seek(SeekFrom::Start(hdr.image_data_offset as u64));
+        
         let mut mips = mip_helper::Mips::generate_levels(hdr.width.into(), hdr.height.into(), mip_helper::Order::big);
         mips.read_mips(reader, &hdr.image_format);
         let mut mip = mip_helper::Mip{resolution:((hdr.fallback_res_image_width).into(),(hdr.fallback_res_image_height).into()),img_data:(None)};
@@ -90,8 +91,10 @@ impl XTFFile {
     pub fn write<W: Write + Seek>(&mut self, f: &mut W) -> std::io::Result<()> {
         self.hdr.write_le(f);
         f.flush();
-        f.seek(SeekFrom::Start(self.hdr.header_size as u64));
+        f.seek(SeekFrom::Start(self.hdr.image_data_offset as u64));
+        f.flush();
         self.mips.write_mips(f);
+        f.flush();
         let result = match &self.low_res.img_data {
             Some(data) =>   f.write(&data).unwrap(),
             None => 0,

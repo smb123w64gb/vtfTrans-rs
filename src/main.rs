@@ -62,6 +62,7 @@ fn main() {
                 },
             }
             println!("Output file is {}",output.display());
+            transition::vtf2xtf(input,output);
         },
             None => println!("Can not progress\n No file found for input"),
         }
