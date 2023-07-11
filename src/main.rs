@@ -27,6 +27,7 @@ mod xtf;
 mod image_format;
 mod mip_helper;
 mod transition;
+mod swizzle;
 
 fn main() {
     let args = Args::parse();
