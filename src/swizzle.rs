@@ -48,9 +48,9 @@ fn get_swizzled_offset(x:u32,y:u32,z:u32,
                            | fill_pattern(mask_z, z))
 }
 fn unswizzle_box(src_buf:Vec<u8>,width:u32,height:u32,depth:u32,row_pitch:u32,slice_pitch:u32,bytes_per_pixel:u32) -> Vec<u8>{
-    let mut mask_x;
-    let mut mask_y;
-    let mut mask_z;
+    let mut mask_x =0;
+    let mut mask_y=0;
+    let mut mask_z=0;
     generate_swizzle_masks(width, height, depth, mask_x, mask_y, mask_z);
     
     let mut x:u32;
@@ -62,12 +62,44 @@ fn unswizzle_box(src_buf:Vec<u8>,width:u32,height:u32,depth:u32,row_pitch:u32,sl
         for y in 0..height{
             for x in 0..width{
                 let src = get_swizzled_offset(x, y, z, mask_x, mask_y, mask_z,
-                                          bytes_per_pixel);
-                let dst = dst_off + y*row_pitch+x*bytes_per_pixel;
-                dst_buf.copy_from_slice(src)
+                                          bytes_per_pixel) as usize;
+                let dst = (dst_off + y*row_pitch+x*bytes_per_pixel) as usize;
+                dst_buf[dst..dst+(bytes_per_pixel as usize)].copy_from_slice(&src_buf[src..src+(bytes_per_pixel as usize)])
             }
         }
         dst_off+=slice_pitch
     }
     dst_buf
+}
+
+fn swizzle_box(src_buf:Vec<u8>,width:u32,height:u32,depth:u32,row_pitch:u32,slice_pitch:u32,bytes_per_pixel:u32) -> Vec<u8>{
+    let mut mask_x =0;
+    let mut mask_y=0;
+    let mut mask_z=0;
+    generate_swizzle_masks(width, height, depth, mask_x, mask_y, mask_z);
+    
+    let mut x:u32;
+    let mut y:u32;
+    let mut z:u32;
+    let mut dst_buf:Vec<u8> = src_buf.clone();
+    let mut src_off = 0;
+    for z in 0..depth {
+        for y in 0..height{
+            for x in 0..width{
+                let src = (src_off + y*row_pitch+x*bytes_per_pixel) as usize;
+                let dst = get_swizzled_offset(x, y, 0, mask_x, mask_y, 0,
+                    bytes_per_pixel) as usize;
+                dst_buf[dst..dst+(bytes_per_pixel as usize)].copy_from_slice(&src_buf[src..src+(bytes_per_pixel as usize)])
+            }
+        }
+        src_off+=slice_pitch
+    }
+    dst_buf
+}
+
+fn unswizzle_rect(src_buf:Vec<u8>,width:u32,height:u32,pitch:u32,bytes_per_pixel:u32)->Vec<u8>{
+    unswizzle_box(src_buf, width, height, 1, pitch, 0, bytes_per_pixel)
+}
+fn swizzle_rect(src_buf:Vec<u8>,width:u32,height:u32,pitch:u32,bytes_per_pixel:u32)->Vec<u8>{
+    swizzle_box(src_buf, width, height, 1, pitch, 0, bytes_per_pixel)
 }
