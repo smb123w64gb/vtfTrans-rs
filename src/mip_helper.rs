@@ -1,8 +1,9 @@
 use core::matches;
 use std::io::{BufReader,BufWriter,Write,Read};
-use std::path::Path;
 
 use crate::image_format;
+use crate::swizzle::*;
+
 pub struct Mip{
     pub resolution : (usize,usize),
     pub img_data : Option<Vec<u8>>,
@@ -34,7 +35,20 @@ impl Mip {
         reader.read_exact(&mut data);
         self.img_data = Some(data)
     }
-    
+    pub fn swizzle(&mut self,format : &image_format::ImageFormat) -> Vec<u8>{
+        match self.img_data.clone() {
+            Some(data) => swizzle_rect(data, self.resolution.0, self.resolution.1, self.resolution.0* image_format::ImageFormatBlock[*format as usize], image_format::ImageFormatBlock[*format as usize]),
+            None => vec![0u8; 0]
+            
+        }
+    }
+    pub fn unswizzle(&mut self,format : &image_format::ImageFormat){
+        let new_data = match self.img_data.clone() {
+            Some(data) => unswizzle_rect(data, self.resolution.0, self.resolution.1, self.resolution.0* image_format::ImageFormatBlock[*format as usize], image_format::ImageFormatBlock[*format as usize]),
+            None => vec![0u8; 0]
+        };
+        self.img_data = Some(new_data)
+    }
 }
 
 impl Mips{

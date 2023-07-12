@@ -1,14 +1,14 @@
 
 use std::collections::btree_map::Range;
 
-fn generate_swizzle_masks(width:u32 ,height:u32 ,depth:u32 ,
-                        mut mask_x:u32 ,mut mask_y:u32 ,mut mask_z:u32){
-    let mut x:u32 = 0;
-    let mut y:u32 = 0;
-    let mut z:u32 = 0;
+fn generate_swizzle_masks(width:usize ,height:usize ,depth:usize ,
+                        mut mask_x:usize ,mut mask_y:usize ,mut mask_z:usize){
+    let mut x:usize = 0;
+    let mut y:usize = 0;
+    let mut z:usize = 0;
 
-    let mut bit:u32 = 1;
-    let mut mask_bit:u32 = 1;
+    let mut bit:usize = 1;
+    let mut mask_bit:usize = 1;
 
     let mut done:bool;
     loop{
@@ -25,10 +25,10 @@ fn generate_swizzle_masks(width:u32 ,height:u32 ,depth:u32 ,
     mask_z = z;
 
 }
-fn fill_pattern(pattern:u32,value:u32)-> u32{
+fn fill_pattern(pattern:usize,value:usize)-> usize{
     let mut value = value;
-    let mut result:u32 = 0;
-    let mut bit:u32 = 0;
+    let mut result:usize = 0;
+    let mut bit:usize = 0;
     while(value>0){
         if ((pattern & bit)>0) {
             /* Copy bit to result */
@@ -40,22 +40,22 @@ fn fill_pattern(pattern:u32,value:u32)-> u32{
     result
 }
 
-fn get_swizzled_offset(x:u32,y:u32,z:u32,
-    mask_x:u32,mask_y:u32,mask_z:u32,
-    bytes_per_pixel:u32) -> u32{
+fn get_swizzled_offset(x:usize,y:usize,z:usize,
+    mask_x:usize,mask_y:usize,mask_z:usize,
+    bytes_per_pixel:usize) -> usize{
         bytes_per_pixel * (fill_pattern(mask_x, x)
                            | fill_pattern(mask_y, y)
                            | fill_pattern(mask_z, z))
 }
-fn unswizzle_box(src_buf:Vec<u8>,width:u32,height:u32,depth:u32,row_pitch:u32,slice_pitch:u32,bytes_per_pixel:u32) -> Vec<u8>{
+fn unswizzle_box(src_buf:Vec<u8>,width:usize,height:usize,depth:usize,row_pitch:usize,slice_pitch:usize,bytes_per_pixel:usize) -> Vec<u8>{
     let mut mask_x =0;
     let mut mask_y=0;
     let mut mask_z=0;
     generate_swizzle_masks(width, height, depth, mask_x, mask_y, mask_z);
     
-    let mut x:u32;
-    let mut y:u32;
-    let mut z:u32;
+    let mut x:usize;
+    let mut y:usize;
+    let mut z:usize;
     let mut dst_buf:Vec<u8> = src_buf.clone();
     let mut dst_off = 0;
     for z in 0..depth {
@@ -72,15 +72,15 @@ fn unswizzle_box(src_buf:Vec<u8>,width:u32,height:u32,depth:u32,row_pitch:u32,sl
     dst_buf
 }
 
-fn swizzle_box(src_buf:Vec<u8>,width:u32,height:u32,depth:u32,row_pitch:u32,slice_pitch:u32,bytes_per_pixel:u32) -> Vec<u8>{
+fn swizzle_box(src_buf:Vec<u8>,width:usize,height:usize,depth:usize,row_pitch:usize,slice_pitch:usize,bytes_per_pixel:usize) -> Vec<u8>{
     let mut mask_x =0;
     let mut mask_y=0;
     let mut mask_z=0;
     generate_swizzle_masks(width, height, depth, mask_x, mask_y, mask_z);
     
-    let mut x:u32;
-    let mut y:u32;
-    let mut z:u32;
+    let mut x:usize;
+    let mut y:usize;
+    let mut z:usize;
     let mut dst_buf:Vec<u8> = src_buf.clone();
     let mut src_off = 0;
     for z in 0..depth {
@@ -97,9 +97,9 @@ fn swizzle_box(src_buf:Vec<u8>,width:u32,height:u32,depth:u32,row_pitch:u32,slic
     dst_buf
 }
 
-fn unswizzle_rect(src_buf:Vec<u8>,width:u32,height:u32,pitch:u32,bytes_per_pixel:u32)->Vec<u8>{
+pub fn unswizzle_rect(src_buf:Vec<u8>,width:usize,height:usize,pitch:usize,bytes_per_pixel:usize)->Vec<u8>{
     unswizzle_box(src_buf, width, height, 1, pitch, 0, bytes_per_pixel)
 }
-fn swizzle_rect(src_buf:Vec<u8>,width:u32,height:u32,pitch:u32,bytes_per_pixel:u32)->Vec<u8>{
+pub fn swizzle_rect(src_buf:Vec<u8>,width:usize,height:usize,pitch:usize,bytes_per_pixel:usize)->Vec<u8>{
     swizzle_box(src_buf, width, height, 1, pitch, 0, bytes_per_pixel)
 }

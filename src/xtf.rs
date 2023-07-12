@@ -83,9 +83,24 @@ impl XTFFile {
         
         let mut mips = mip_helper::Mips::generate_levels(hdr.width.into(), hdr.height.into(), mip_helper::Order::big);
         mips.read_mips(reader, &hdr.image_format);
+        for mipz in &mut mips.level{
+        match hdr.image_format {
+            ImageFormat::IMAGE_FORMAT_DXT1 => {},
+                ImageFormat::IMAGE_FORMAT_DXT1_ONEBITALPHA => {},
+                ImageFormat::IMAGE_FORMAT_DXT3 => {},
+                ImageFormat::IMAGE_FORMAT_DXT5 => {},
+                _ => mipz.unswizzle(&hdr.image_format),
+        }
+    };
         let mut mip = mip_helper::Mip{resolution:((hdr.fallback_res_image_width).into(),(hdr.fallback_res_image_height).into()),img_data:(None)};
         mip.read_mip(reader, &hdr.image_format);
-        
+        match hdr.image_format {
+            ImageFormat::IMAGE_FORMAT_DXT1 => {},
+                ImageFormat::IMAGE_FORMAT_DXT1_ONEBITALPHA => {},
+                ImageFormat::IMAGE_FORMAT_DXT3 => {},
+                ImageFormat::IMAGE_FORMAT_DXT5 => {},
+                _ => mip.unswizzle(&hdr.image_format),
+        }
         XTFFile { hdr: (hdr), mips: (mips), low_res: (mip) }
     }
     pub fn write<W: Write + Seek>(&mut self, f: &mut W) -> std::io::Result<()> {
@@ -94,11 +109,26 @@ impl XTFFile {
         f.seek(SeekFrom::Start(self.hdr.image_data_offset as u64));
         f.flush();
         self.mips.write_mips(f);
-        f.flush();
-        let result = match &self.low_res.img_data {
-            Some(data) =>   f.write(&data).unwrap(),
-            None => 0,
+        for mipz in &mut self.mips.level{
+            let data_write = match self.hdr.image_format {
+                ImageFormat::IMAGE_FORMAT_DXT1 => mipz.img_data.clone().unwrap(),
+                ImageFormat::IMAGE_FORMAT_DXT1_ONEBITALPHA => mipz.img_data.clone().unwrap(),
+                ImageFormat::IMAGE_FORMAT_DXT3 => mipz.img_data.clone().unwrap(),
+                ImageFormat::IMAGE_FORMAT_DXT5 => mipz.img_data.clone().unwrap(),
+                _ => mipz.swizzle(&self.hdr.image_format),
+            };
+            f.write(&data_write).unwrap();
+            f.flush();
+        }
+        let data_write = match self.hdr.image_format {
+            ImageFormat::IMAGE_FORMAT_DXT1 => self.low_res.img_data.clone().unwrap(),
+            ImageFormat::IMAGE_FORMAT_DXT1_ONEBITALPHA => self.low_res.img_data.clone().unwrap(),
+            ImageFormat::IMAGE_FORMAT_DXT3 => self.low_res.img_data.clone().unwrap(),
+            ImageFormat::IMAGE_FORMAT_DXT5 => self.low_res.img_data.clone().unwrap(),
+            _ => self.low_res.swizzle(&self.hdr.image_format),
         };
+        f.write(&data_write).unwrap();
+
         f.flush()
     }
 }
