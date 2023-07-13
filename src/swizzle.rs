@@ -2,17 +2,12 @@
 
 fn generate_swizzle_masks(width:usize ,height:usize ,depth:usize)
     -> (usize,usize,usize){
-    let mut x:u32 = 0;
-    let mut y:u32 = 0;
-    let mut z:u32 = 0;
+    let mut x:usize = 0;
+    let mut y:usize = 0;
+    let mut z:usize = 0;
 
-    let width:u32 = width as u32;
-    let height:u32 = height as u32;
-    let depth:u32 = depth as u32;
-    
-
-    let mut bit:u32 = 1;
-    let mut mask_bit:u32 = 1;
+    let mut bit:usize = 1;
+    let mut mask_bit:usize = 1;
 
     let mut done:bool = false;
     while(!done){
@@ -23,14 +18,13 @@ fn generate_swizzle_masks(width:usize ,height:usize ,depth:usize)
         bit <<= 1;
     }
     assert!(((x ^ y) ^ z) == (mask_bit - 1));
-    return(x as usize,y as usize,z as usize);
+    return(x,y,z);
 
 }
 fn fill_pattern(pattern:usize,value:usize)-> usize{
-    let mut value:u32 = value as u32;
-    let pattern:u32 = pattern as u32;
-    let mut result:u32 = 0;
-    let mut bit:u32 = 1;
+    let mut value:usize = value;
+    let mut result:usize = 0;
+    let mut bit:usize = 1;
     while(value!=0){
         if ((pattern & bit) != 0) {
             /* Copy bit to result */
@@ -39,7 +33,7 @@ fn fill_pattern(pattern:usize,value:usize)-> usize{
         }
         bit <<= 1;
     }
-    result as usize
+    result
 }
 
 fn get_swizzled_offset(x:usize,y:usize,z:usize,
@@ -61,9 +55,9 @@ fn unswizzle_box(src_buf:Vec<u8>,width:usize,height:usize,depth:usize,row_pitch:
         for y in 0..height{
             for x in 0..width{
                 let src = get_swizzled_offset(x, y, z, mask_x, mask_y, mask_z,
-                                          bytes_per_pixel) as usize;
-                let dst = (dst_off + y*row_pitch+x*bytes_per_pixel) as usize;
-                dst_buf[dst..dst+(bytes_per_pixel as usize)].copy_from_slice(&src_buf[src..src+(bytes_per_pixel as usize)])
+                                          bytes_per_pixel);
+                let dst = (dst_off + y*row_pitch+x*bytes_per_pixel);
+                dst_buf[dst..dst+bytes_per_pixel].copy_from_slice(&src_buf[src..src+bytes_per_pixel])
             }
         }
         dst_off+=slice_pitch
@@ -82,10 +76,10 @@ fn swizzle_box(src_buf:Vec<u8>,width:usize,height:usize,depth:usize,row_pitch:us
     for z in 0..depth {
         for y in 0..height{
             for x in 0..width{
-                let src = (src_off + y*row_pitch+x*bytes_per_pixel) as usize;
+                let src = src_off + y*row_pitch+x*bytes_per_pixel;
                 let dst = get_swizzled_offset(x, y, 0, mask_x, mask_y, 0,
-                    bytes_per_pixel) as usize;
-                dst_buf[dst..dst+(bytes_per_pixel as usize)].copy_from_slice(&src_buf[src..src+(bytes_per_pixel as usize)])
+                    bytes_per_pixel);
+                dst_buf[dst..dst+bytes_per_pixel].copy_from_slice(&src_buf[src..src+bytes_per_pixel])
             }
         }
         src_off+=slice_pitch
