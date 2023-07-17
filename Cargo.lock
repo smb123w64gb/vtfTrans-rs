@@ -88,6 +88,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "630be753d4e58660abd17930c71b647fe46c27ea6b63cc59e1e3851406972e42"
 
 [[package]]
+name = "bitmask-enum"
+version = "2.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "78d456f91b4c1fdebf2698214e599fec3d7f8b46e3140fb254a9ea88c970ab0a"
+dependencies = [
+ "quote",
+ "syn 2.0.23",
+]
+
+[[package]]
 name = "bytemuck"
 version = "1.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -323,6 +333,7 @@ name = "vtfTrans-rs"
 version = "0.1.0"
 dependencies = [
  "binrw",
+ "bitmask-enum",
  "clap",
  "modular-bitfield",
 ]

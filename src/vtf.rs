@@ -42,7 +42,7 @@ pub struct VTFHdr {
 pub struct VTFFile{
     pub hdr:VTFHdr,
     pub low_res:mip_helper::Mip,
-    pub mips:mip_helper::Mips,
+    pub mips:Vec<mip_helper::Mips>,
 }
 
 
@@ -72,12 +72,18 @@ impl VTFFile {
         reader.seek(SeekFrom::Start((hdr.header_size as u64)));
         let mut mip = mip_helper::Mip{resolution:((hdr.low_res_image_width).into(),(hdr.low_res_image_height).into()),img_data:(None)};
         mip.read_mip(reader, &hdr.low_res_image_format);
-        let mut mips = mip_helper::Mips::generate_levels(hdr.width.into(), hdr.height.into(), mip_helper::Order::little);
-        mips.read_mips(reader, &hdr.image_format);
         
+        let mut frames = vec![];
+        for i in 0..hdr.num_frames{
+        let mut mips = mip_helper::Mips::generate_levels(hdr.width.into(), hdr.height.into(), mip_helper::Order::big);
+        frames.push(mips);
+        };
+        for mips in &mut frames{
+        mips.read_mips(reader, &hdr.image_format);
+    }
         
 
-        VTFFile { hdr: (hdr), mips: (mips), low_res: (mip) }
+        VTFFile { hdr: (hdr), mips: (frames), low_res: (mip) }
     }
     pub fn write<W: Write + Seek>(&mut self, f: &mut W) -> std::io::Result<()> {
         self.hdr.write_le(f);
@@ -88,8 +94,10 @@ impl VTFFile {
             None => 0,
         };
         f.flush();
-        self.mips.write_mips(f);
-        f.flush()
-
+        for i in &mut self.mips{
+            i.write_mips(f);
+        f.flush();
+    }
+    f.flush()
     }
 }

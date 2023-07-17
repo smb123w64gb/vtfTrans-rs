@@ -2,7 +2,8 @@ use binrw::{BinRead, BinWrite,BinReaderExt,BinWriterExt,BinResult,io::{Read,Curs
 use std::io::{BufReader,BufWriter};
 use std::path::Path;
 
-use crate::{image_format::{ImageFormat}, mip_helper};
+
+use crate::{image_format::{ImageFormat,ImageFlags}, mip_helper};
 
 
 
@@ -51,7 +52,7 @@ pub struct XTFHdr {
 
 pub struct XTFFile {
     pub hdr:XTFHdr,
-    pub mips:mip_helper::Mips,
+    pub mips:Vec<mip_helper::Mips>,
     pub low_res:mip_helper::Mip,
 }
 
@@ -79,9 +80,20 @@ impl XTFFile {
     }
     pub fn read<R: Read + Seek>(reader: &mut R) -> Self {
         let hdr:XTFHdr = XTFHdr::read(reader).unwrap();
+        let mut flags:ImageFlags = ImageFlags::TEXTUREFLAGS_NONE;
+        flags.set_to(hdr.flags);
+        if(flags.intersects(ImageFlags::TEXTUREFLAGS_NOMIP)){
+            println!("No Mips here");
+        }
+
         reader.seek(SeekFrom::Start(hdr.image_data_offset as u64));
         
+        let mut frames = vec![];
+        for i in 0..hdr.num_frames{
         let mut mips = mip_helper::Mips::generate_levels(hdr.width.into(), hdr.height.into(), mip_helper::Order::big);
+        frames.push(mips);
+        };
+        for mips in &mut frames{
         mips.read_mips(reader, &hdr.image_format);
         for mipz in &mut mips.level{
         match hdr.image_format {
@@ -90,8 +102,10 @@ impl XTFFile {
                 ImageFormat::IMAGE_FORMAT_DXT3 => {},
                 ImageFormat::IMAGE_FORMAT_DXT5 => {},
                 _ => mipz.unswizzle(&hdr.image_format),
+        };
+        
+    }
         }
-    };
         let mut mip = mip_helper::Mip{resolution:((hdr.fallback_res_image_width).into(),(hdr.fallback_res_image_height).into()),img_data:(None)};
         mip.read_mip(reader, &hdr.image_format);
         match hdr.image_format {
@@ -101,15 +115,15 @@ impl XTFFile {
                 ImageFormat::IMAGE_FORMAT_DXT5 => {},
                 _ => mip.unswizzle(&hdr.image_format),
         }
-        XTFFile { hdr: (hdr), mips: (mips), low_res: (mip) }
+        XTFFile { hdr: (hdr), mips: (frames), low_res: (mip) }
     }
     pub fn write<W: Write + Seek>(&mut self, f: &mut W) -> std::io::Result<()> {
         self.hdr.write_le(f);
         f.flush();
         f.seek(SeekFrom::Start(self.hdr.image_data_offset as u64));
         f.flush();
-        self.mips.write_mips(f);
-        for mipz in &mut self.mips.level{
+        for i in &mut self.mips{
+        for mipz in &mut i.level{
             let data_write = match self.hdr.image_format {
                 ImageFormat::IMAGE_FORMAT_DXT1 => mipz.img_data.clone().unwrap(),
                 ImageFormat::IMAGE_FORMAT_DXT1_ONEBITALPHA => mipz.img_data.clone().unwrap(),
@@ -119,7 +133,7 @@ impl XTFFile {
             };
             f.write(&data_write).unwrap();
             f.flush();
-        }
+        }}
         let data_write = match self.hdr.image_format {
             ImageFormat::IMAGE_FORMAT_DXT1 => self.low_res.img_data.clone().unwrap(),
             ImageFormat::IMAGE_FORMAT_DXT1_ONEBITALPHA => self.low_res.img_data.clone().unwrap(),

@@ -9,8 +9,14 @@ pub fn xtf2vtf<P: AsRef<Path>>(input:P,output:P){
     let infile = XTFFile::open(input);
     println!("{:?}",infile.hdr.image_format);
     let mut newmips = infile.mips;
-    newmips.reverse();
-    let mut outfile = VTFFile{hdr:(VTFHdr { version: ((7,2)), header_size: (0x50), width: (infile.hdr.width), height: (infile.hdr.height), flags: (infile.hdr.flags), num_frames: (infile.hdr.num_frames), start_frame: (0), reflectivity: (VectorAligned { x: (infile.hdr.reflectivity.x), y: (infile.hdr.reflectivity.y), z: (infile.hdr.reflectivity.z) }), bump_scale: (infile.hdr.bump_scale), image_format: (infile.hdr.image_format), num_mip_levels: (newmips.level.len() as u8), low_res_image_format: (infile.hdr.image_format), low_res_image_width: (infile.hdr.fallback_res_image_width), low_res_image_height: (infile.hdr.fallback_res_image_height), depth: (infile.hdr.depth) })
+    let mut mipsize: u8 = 0;
+    for a in &mut newmips{
+        a.reverse();
+        mipsize = a.level.len() as u8;
+    }
+    
+
+    let mut outfile = VTFFile{hdr:(VTFHdr { version: ((7,2)), header_size: (0x50), width: (infile.hdr.width), height: (infile.hdr.height), flags: (infile.hdr.flags), num_frames: (infile.hdr.num_frames), start_frame: (0), reflectivity: (VectorAligned { x: (infile.hdr.reflectivity.x), y: (infile.hdr.reflectivity.y), z: (infile.hdr.reflectivity.z) }), bump_scale: (infile.hdr.bump_scale), image_format: (infile.hdr.image_format), num_mip_levels: (mipsize), low_res_image_format: (infile.hdr.image_format), low_res_image_width: (infile.hdr.fallback_res_image_width), low_res_image_height: (infile.hdr.fallback_res_image_height), depth: (infile.hdr.depth) })
     ,mips:(newmips),low_res:(infile.low_res)};
     outfile.write(&mut BufWriter::new(std::fs::File::create(output).unwrap()));
 }

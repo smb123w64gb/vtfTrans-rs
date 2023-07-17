@@ -14,5 +14,6 @@ panic = "abort"
 
 [dependencies]
 binrw = "0.11.2"
+bitmask-enum = "2.2.1"
 clap = { version = "4.3.11", features = ["derive"] }
 modular-bitfield = "0.11.2"
