@@ -2,7 +2,7 @@ use binrw::{BinRead, BinWrite,BinReaderExt,BinWriterExt,BinResult, io::{Read,Wri
 use std::{io::BufReader, sync::Arc};
 use std::path::Path;
 
-use crate::{image_format::ImageFormat, mip_helper};
+use crate::{image_format::{ImageFormat,ImageFlags}, mip_helper::{self, Mips}};
 
 
 
@@ -70,12 +70,19 @@ impl VTFFile {
     pub fn read<R: Read + Seek>(reader: &mut R) -> Self {
         let hdr:VTFHdr = VTFHdr::read(reader).unwrap();
         reader.seek(SeekFrom::Start((hdr.header_size as u64)));
-        let mut mip = mip_helper::Mip{resolution:((hdr.low_res_image_width).into(),(hdr.low_res_image_height).into()),img_data:(None)};
-        mip.read_mip(reader, &hdr.low_res_image_format);
+
+        let mut flags:ImageFlags = ImageFlags::TEXTUREFLAGS_NONE;
+        flags.set_to(hdr.flags);
         
+
+        let mut mip = mip_helper::Mip{resolution:((hdr.low_res_image_width).into(),(hdr.low_res_image_height).into()),img_data:(None)};
+        if((hdr.low_res_image_format as usize) < (ImageFormat::NUM_IMAGE_FORMATS as usize)){
+        mip.read_mip(reader, &hdr.low_res_image_format);
+    }
         let mut frames = vec![];
         for i in 0..hdr.num_frames{
-        let mut mips = mip_helper::Mips::generate_levels(hdr.width.into(), hdr.height.into(), mip_helper::Order::big);
+        let mut mips = mip_helper::Mips::generate_levels(hdr.width.into(), hdr.height.into(), mip_helper::Order::big,false);
+
         frames.push(mips);
         };
         for mips in &mut frames{
@@ -87,16 +94,14 @@ impl VTFFile {
     }
     pub fn write<W: Write + Seek>(&mut self, f: &mut W) -> std::io::Result<()> {
         self.hdr.write_le(f);
-        f.flush();
         f.seek(SeekFrom::Start(self.hdr.header_size as u64));
         let result = match &self.low_res.img_data {
             Some(data) =>   f.write(&data).unwrap(),
             None => 0,
         };
-        f.flush();
         for i in &mut self.mips{
             i.write_mips(f);
-        f.flush();
+
     }
     f.flush()
     }

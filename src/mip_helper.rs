@@ -52,13 +52,17 @@ impl Mip {
 }
 
 impl Mips{
-    pub fn generate_levels(w:usize,h:usize,Order:Order) -> Self{
+    pub fn generate_levels(w:usize,h:usize,Order:Order,single:bool) -> Self{
         let direction = Order;
         let mut power = 1;
         let mut level:Vec<Mip>=vec![];
-        while(w/power)>0 && (h/power)>0{
-            level.push(Mip{resolution:((w/power),(h/power)),img_data:(None)});
-            power = power << 1;
+        if(single){
+            level.push(Mip{resolution:((w),(h)),img_data:(None)});
+        }else{
+            while(w/power)>0 && (h/power)>0{
+                level.push(Mip{resolution:((w/power),(h/power)),img_data:(None)});
+                power = power << 1;
+            }
         }
         if matches!(&direction,Order::little) {
             level.reverse();

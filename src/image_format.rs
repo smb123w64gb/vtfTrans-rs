@@ -49,6 +49,18 @@ pub enum ImageFormat
 	NUM_IMAGE_FORMATS
 }
 
+impl ImageFormat{
+	pub fn is_cmp(self) -> bool{
+		return match self {
+            ImageFormat::IMAGE_FORMAT_DXT1 => true,
+            ImageFormat::IMAGE_FORMAT_DXT1_ONEBITALPHA => true,
+            ImageFormat::IMAGE_FORMAT_DXT3 => true,
+            ImageFormat::IMAGE_FORMAT_DXT5 => true,
+            _ => false,
+		}
+	}
+}
+
 #[bitmask(u32)]
 pub enum ImageFlags{
 	// flags from the *.txt config file
@@ -96,7 +108,6 @@ impl ImageFlags {
 	pub fn set_to(&mut self, val: u32) {
         self.bits = val
     }
-	
 }
 
 pub static ImageFormatBlock: &'static [usize] = &[4,4,3,3,2,1,2,1,1,3,3,4,4,8,16,16,4,2,2,2,8,2,2,4,8,8,4,4,12,16,4,4,4,4,4,3,3,2,1];
