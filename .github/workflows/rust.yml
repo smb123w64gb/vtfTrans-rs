@@ -1,0 +1,47 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: cargo build --verbose --release
+    - name: Run tests
+      run: cargo test --verbose --release
+
+    - name: Upload build
+      uses: actions/upload-artifact@v3
+      with:
+        name: release
+        path: /home/runner/work/vtfTrans-rs/vtfTrans-rs/target/release/vtfTrans-rs
+
+
+  build-win:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: cargo build --verbose --release
+    - name: Run tests
+      run: cargo test --verbose --release
+
+    - name: Upload build-win
+      uses: actions/upload-artifact@v3
+      with:
+        name: release
+        path: target\release\vtfTrans-rs.exe
+
+  
