@@ -38,7 +38,10 @@ jobs:
     - name: Run tests
       run: cargo test --verbose --release
 
-    - name: prntcd
-      run: cd
+    - name: Upload build-win
+      uses: actions/upload-artifact@v3
+      with:
+        name: rel-linux
+        path: target\release\vtfTrans-rs.exe
 
   
