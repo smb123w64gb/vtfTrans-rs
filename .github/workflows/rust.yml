@@ -26,3 +26,16 @@ jobs:
       with:
         name: rel-linux
         path: /home/runner/work/vtfTrans-rs/vtfTrans-rs/target/release/vtfTrans-rs
+
+
+  build-win:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: cargo build --verbose --release
+    - name: Run tests
+      run: cargo test --verbose --release
+
+  
