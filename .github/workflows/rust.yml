@@ -38,4 +38,7 @@ jobs:
     - name: Run tests
       run: cargo test --verbose --release
 
+    - name: prntcd
+      run: cd
+
   
