@@ -17,6 +17,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build
-      run: cargo build --verbose
+      run: cargo build --verbose --release
     - name: Run tests
-      run: cargo test --verbose
+      run: cargo test --verbose --release
+
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v3
+      with:
+        name: rel-linux
+        path: vtfTrans-rs/target/vtfTrans-rs
