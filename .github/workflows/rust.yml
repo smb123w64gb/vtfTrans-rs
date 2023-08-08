@@ -24,7 +24,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v3
       with:
-        name: rel-linux
+        name: release
         path: /home/runner/work/vtfTrans-rs/vtfTrans-rs/target/release/vtfTrans-rs
 
 
@@ -41,7 +41,7 @@ jobs:
     - name: Upload build-win
       uses: actions/upload-artifact@v3
       with:
-        name: rel-linux
+        name: release
         path: target\release\vtfTrans-rs.exe
 
   
