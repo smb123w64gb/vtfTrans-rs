@@ -1,5 +1,6 @@
 use binrw::{BinRead, BinWrite,BinReaderExt,BinWriterExt,BinResult, io::{Read,Write,Cursor, Seek,SeekFrom}};
-use std::{io::BufReader, sync::Arc};
+use std::{io::BufReader};
+use bitmask_enum::bitmask;
 use std::path::Path;
 
 use crate::{image_format::{ImageFormat,ImageFlags}, mip_helper::{self, Mips}};
@@ -36,7 +37,22 @@ pub struct VTFHdr {
     pub low_res_image_format:ImageFormat,
     pub low_res_image_width:u8,
     pub low_res_image_height:u8,
+    #[br(if(version.1 > 1 ))]
     pub depth:u16,
+    #[br(if(version.1 > 2 ))]
+    pub ext:Option<VTF73Ext>
+}
+#[derive(BinRead, BinWrite)]
+pub struct VTF73Ext {
+    #[brw(align_before = 0x4)]
+    numResources : u32,
+    #[br(args{count: numResources as usize},align_before = 0x10)]
+    entrys : Vec<ResourceEntryInfo>
+}
+#[derive(BinRead, BinWrite)]
+pub struct ResourceEntryInfo {
+    tagnflag : u32,
+    offset : u32
 }
 
 pub struct VTFFile{
@@ -58,7 +74,7 @@ impl VTFHdr{
         f.flush()
     }
     pub fn new() -> Self{
-        Self { version: (VTF_MAJOR_VERSION,VTF_MINOR_VERSION), header_size: (0x50), width: (0), height: (0), flags: (0), num_frames: (1), start_frame: (0), reflectivity: (VectorAligned { x: (1.0), y: (1.0), z: (1.0) }), bump_scale: (1.0), image_format: (ImageFormat::IMAGE_FORMAT_UNKNOWN), num_mip_levels: (1), low_res_image_format: (ImageFormat::IMAGE_FORMAT_UNKNOWN), low_res_image_width: (0), low_res_image_height: (0),depth: (1) }
+        Self { version: (VTF_MAJOR_VERSION,VTF_MINOR_VERSION), header_size: (0x50), width: (0), height: (0), flags: (0), num_frames: (1), start_frame: (0), reflectivity: (VectorAligned { x: (1.0), y: (1.0), z: (1.0) }), bump_scale: (1.0), image_format: (ImageFormat::IMAGE_FORMAT_UNKNOWN), num_mip_levels: (1), low_res_image_format: (ImageFormat::IMAGE_FORMAT_UNKNOWN), low_res_image_width: (0), low_res_image_height: (0),depth: (1),ext:(None)}
     }
 }
 
@@ -76,13 +92,10 @@ impl VTFFile {
         
 
         let mut mip = mip_helper::Mip{resolution:((hdr.low_res_image_width).into(),(hdr.low_res_image_height).into()),img_data:(None)};
-        if((hdr.low_res_image_format as usize) < (ImageFormat::NUM_IMAGE_FORMATS as usize)){
-        mip.read_mip(reader, &hdr.low_res_image_format);
-    }
+        if((hdr.low_res_image_format as usize) < (ImageFormat::NUM_IMAGE_FORMATS as usize)){mip.read_mip(reader, &hdr.low_res_image_format);}
         let mut frames = vec![];
         for i in 0..hdr.num_frames{
         let mut mips = mip_helper::Mips::generate_levels(hdr.width.into(), hdr.height.into(), mip_helper::Order::big,false);
-
         frames.push(mips);
         };
         for mips in &mut frames{
