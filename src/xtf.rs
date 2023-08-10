@@ -86,7 +86,8 @@ impl XTFFile {
         reader.seek(SeekFrom::Start(hdr.image_data_offset as u64));
         
         let mut frames = vec![];
-        for i in 0..hdr.num_frames{
+        let frame_count = if flags.intersects(ImageFlags::TEXTUREFLAGS_ENVMAP) {6} else {hdr.num_frames};
+        for i in 0..frame_count{
         let mut mips = mip_helper::Mips::generate_levels(hdr.width.into(), hdr.height.into(), mip_helper::Order::little,flags.intersects(ImageFlags::TEXTUREFLAGS_NOMIP));
         frames.push(mips);
         };

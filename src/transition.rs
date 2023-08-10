@@ -1,6 +1,7 @@
 use std::path::Path;
 use std::io::BufWriter;
 
+use crate::image_format::ImageFormat;
 use crate::xtf::*;
 use crate::vtf::*;
 
@@ -15,7 +16,7 @@ pub fn xtf2vtf<P: AsRef<Path>>(input:P,output:P){
     }
     
 
-    let mut outfile = VTFFile{hdr:(VTFHdr { version: ((7,2)), header_size: (0x50), width: (infile.hdr.width), height: (infile.hdr.height), flags: (infile.hdr.flags), num_frames: (infile.hdr.num_frames), start_frame: (0), reflectivity: (VectorAligned { x: (infile.hdr.reflectivity.x), y: (infile.hdr.reflectivity.y), z: (infile.hdr.reflectivity.z) }), bump_scale: (infile.hdr.bump_scale), image_format: (infile.hdr.image_format), num_mip_levels: (mipsize), low_res_image_format: (infile.hdr.image_format), low_res_image_width: (infile.hdr.fallback_res_image_width), low_res_image_height: (infile.hdr.fallback_res_image_height), depth: (infile.hdr.depth),ext:(None)})
+    let mut outfile = VTFFile{hdr:(VTFHdr { version: ((7,2)), header_size: (0x50), width: (infile.hdr.width), height: (infile.hdr.height), flags: (infile.hdr.flags), num_frames: (infile.hdr.num_frames), start_frame: (0), reflectivity: (VectorAligned { x: (infile.hdr.reflectivity.x), y: (infile.hdr.reflectivity.y), z: (infile.hdr.reflectivity.z) }), bump_scale: (infile.hdr.bump_scale), image_format: (infile.hdr.image_format), num_mip_levels: (mipsize), low_res_image_format: (if infile.hdr.fallback_res_image_width > 0 && infile.hdr.fallback_res_image_height > 0 {infile.hdr.image_format}else{ImageFormat::IMAGE_FORMAT_UNKNOWN}), low_res_image_width: (infile.hdr.fallback_res_image_width), low_res_image_height: (infile.hdr.fallback_res_image_height), depth: (infile.hdr.depth),ext:(None)})
     ,mips:(newmips),low_res:(infile.low_res)};
     outfile.write(&mut BufWriter::new(std::fs::File::create(output).unwrap()));
 }
