@@ -87,7 +87,7 @@ impl XTFFile {
         
         let mut frames = vec![];
         for i in 0..hdr.num_frames{
-        let mut mips = mip_helper::Mips::generate_levels(hdr.width.into(), hdr.height.into(), mip_helper::Order::big,flags.intersects(ImageFlags::TEXTUREFLAGS_NOMIP));
+        let mut mips = mip_helper::Mips::generate_levels(hdr.width.into(), hdr.height.into(), mip_helper::Order::little,flags.intersects(ImageFlags::TEXTUREFLAGS_NOMIP));
         frames.push(mips);
         };
         for mips in &mut frames{
