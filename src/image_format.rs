@@ -1,7 +1,7 @@
 use binrw::{BinRead,BinWrite};
 use bitmask_enum::bitmask;
 
-#[derive(BinRead, BinWrite,Debug,Copy, Clone)]
+#[derive(BinRead, BinWrite,Debug,Copy, Clone,PartialEq)]
 #[brw(repr(u32))]
 pub enum ImageFormat
 {
@@ -110,4 +110,4 @@ impl ImageFlags {
     }
 }
 
-pub static ImageFormatBlock: &'static [usize] = &[4,4,3,3,2,1,2,1,1,3,3,4,4,8,16,16,4,2,2,2,8,2,2,4,8,8,4,4,12,16,4,4,4,4,4,3,3,2,1];
+pub static ImageFormatBlock: &'static [usize] = &[4,4,3,3,2,1,2,1,1,3,3,4,4,8,16,16,4,2,2,2,8,2,2,4,64,64,4,12,16,4,4,4,4,4,3,3,2,1];
