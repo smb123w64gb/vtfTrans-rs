@@ -92,11 +92,14 @@ impl VTFFile {
         
 
         let mut mip = mip_helper::Mip{resolution:((hdr.low_res_image_width).into(),(hdr.low_res_image_height).into()),img_data:(None)};
-        if((hdr.low_res_image_format as usize) < (ImageFormat::NUM_IMAGE_FORMATS as usize)){mip.read_mip(reader, &hdr.low_res_image_format);}
+        match hdr.low_res_image_format{
+            ImageFormat::IMAGE_FORMAT_UNKNOWN =>  {},
+            _ => {mip.read_mip(reader, &hdr.low_res_image_format)},
+        }
         let mut frames = vec![];
         let frame_count = if flags.intersects(ImageFlags::TEXTUREFLAGS_ENVMAP) {6} else {hdr.num_frames};
         for i in 0..frame_count{
-        let mut mips = mip_helper::Mips::generate_levels(hdr.width.into(), hdr.height.into(), mip_helper::Order::big,false);
+        let mut mips = mip_helper::Mips::generate_levels(hdr.width.into(), hdr.height.into(), mip_helper::Order::little,false);
         frames.push(mips);
         };
         for mips in &mut frames{
