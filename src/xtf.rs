@@ -88,7 +88,7 @@ impl XTFFile {
         let mut frames = vec![];
         let frame_count = if flags.intersects(ImageFlags::TEXTUREFLAGS_ENVMAP) {7} else {hdr.num_frames};
         for i in 0..frame_count{
-        let mut mips = mip_helper::Mips::generate_levels(hdr.width.into(), hdr.height.into(), mip_helper::Order::little,flags.intersects(ImageFlags::TEXTUREFLAGS_NOMIP));
+        let mut mips = mip_helper::Mips::generate_levels(hdr.width.into(), hdr.height.into(), mip_helper::Order::big,flags.intersects(ImageFlags::TEXTUREFLAGS_NOMIP));
         frames.push(mips);
         };
         for mips in &mut frames{
@@ -112,9 +112,6 @@ impl XTFFile {
     pub fn write<W: Write + Seek>(&mut self, f: &mut W) -> std::io::Result<()> {
         let mut flags:ImageFlags = ImageFlags::TEXTUREFLAGS_NONE;
         flags.set_to(self.hdr.flags);
-        if(flags.intersects(ImageFlags::TEXTUREFLAGS_NOMIP)){
-            
-        }
         self.hdr.write_le(f);
         f.seek(SeekFrom::Start(self.hdr.image_data_offset as u64));
         for i in &mut self.mips{
