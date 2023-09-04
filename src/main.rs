@@ -13,6 +13,9 @@ struct Args {
     #[arg(short,long)]
     xtf: bool,
 
+    /// Half the res of vtf
+    #[arg(short,long)]
+    reduce: bool,
     /// Takes in .vtf or .xtf to convert from
     #[arg(value_name = "IN_FILE")]
     input_file: Option<PathBuf>,
@@ -63,7 +66,7 @@ fn main() {
                 },
             }
             println!("Output file is {}",output.display());
-            transition::vtf2xtf(input,output);
+            transition::vtf2xtf(input,output,args.reduce);
         },
             None => println!("Can not progress\n No file found for input"),
         }

@@ -49,6 +49,9 @@ impl Mip {
         };
         self.img_data = Some(new_data)
     }
+    pub fn clone(&mut self) -> Mip{
+        Mip { resolution: (self.resolution.clone()), img_data: (self.img_data.clone()) }
+    }
 }
 
 impl Mips{
@@ -90,6 +93,9 @@ impl Mips{
             };
         }
         f.flush()
+    }
+    pub fn pop(&mut self) -> Option<Mip>{
+        self.level.pop()
     }
 
 }
