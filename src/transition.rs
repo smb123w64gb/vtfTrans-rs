@@ -29,13 +29,11 @@ pub fn vtf2xtf<P: AsRef<Path>>(input:P,output:P,half:bool){
     let infile = VTFFile::open(input);
     println!("{:?}",infile.hdr.image_format);
     let mut newmips = infile.mips;
-    let mut newmip = crate::mip_helper::Mip { resolution: (0,0), img_data: (None) };
     for a in &mut newmips{
         a.reverse();
-        if half {
+        if half && a.level.len() > 1{
             a.pop();
         }
-        newmip = a.level[3].clone();
     }
     let mut lw;
     let mut lh;

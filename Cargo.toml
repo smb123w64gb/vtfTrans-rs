@@ -16,4 +16,5 @@ panic = "abort"
 binrw = "0.11.2"
 bitmask-enum = "2.2.1"
 clap = { version = "4.3.11", features = ["derive"] }
+image_dds = "0.7.1"
 modular-bitfield = "0.11.2"
